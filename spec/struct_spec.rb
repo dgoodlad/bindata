@@ -5,15 +5,14 @@ require 'bindata'
 
 describe "A Struct with hidden fields" do
   before(:all) do
-    eval <<-END
-      class HiddenStruct < BinData::Struct
-        hide :b, 'c'
-        int8 :a
-        int8 'b', :initial_value => 10
-        int8 :c
-        int8 :d, :value => :b
-      end
-    END
+    class HiddenStruct < BinData::Struct
+      hide :b, 'c'
+      int8 :a
+      int8 'b', :initial_value => 10
+      int8 :c
+      int8 :d, :value => :b
+    end
+
     @obj = HiddenStruct.new
   end
 
@@ -37,14 +36,13 @@ end
 
 describe "A Struct that delegates" do
   before(:all) do
-    eval <<-END
-      class DelegateStruct < BinData::Struct
-        delegate :b
-        int8 :a, :initial_value => :num
-        int8 'b', :initial_value => 7
-        int8 :c, :value => :b
-      end
-    END
+    class DelegateStruct < BinData::Struct
+      delegate :b
+      int8 :a, :initial_value => :num
+      int8 'b', :initial_value => 7
+      int8 :c, :value => :b
+    end
+
     @obj = DelegateStruct.new(:num => 5)
   end
 
@@ -87,15 +85,14 @@ end
 
 describe "A Struct with nested delegation" do
   before(:all) do
-    eval <<-END
-      class DelegateOuterStruct < BinData::Struct
-        endian :little
-        delegate :b
-        int8 :a
-        struct :b, :delegate => :y,
-                   :fields => [[:int8, :x], [:int32, :y], [:int8, :z]]
-      end
-    END
+    class DelegateOuterStruct < BinData::Struct
+      endian :little
+      delegate :b
+      int8 :a
+      struct :b, :delegate => :y,
+        :fields => [[:int8, :x], [:int32, :y], [:int8, :z]]
+    end
+
     @obj = DelegateOuterStruct.new(:initial_value => 7)
   end
 
@@ -121,11 +118,9 @@ describe "Defining a Struct" do
   end
   it "should fail on non registered types" do
     lambda {
-      eval <<-END
-        class BadType < BinData::Struct
-          non_registerd_type :a
-        end
-      END
+      class BadType < BinData::Struct
+        non_registerd_type :a
+      end
     }.should raise_error(TypeError)
 
     lambda {
@@ -140,24 +135,20 @@ describe "Defining a Struct" do
 
   it "should fail on duplicate names" do
     lambda {
-      eval <<-END
-        class DuplicateName < BinData::Struct
-          int8 :a
-          int8 :b
-          int8 :a
-        end
-      END
+      class DuplicateName < BinData::Struct
+        int8 :a
+        int8 :b
+        int8 :a
+      end
     }.should raise_error(SyntaxError)
   end
 
   it "should fail on reserved names" do
     lambda {
-      eval <<-END
-        class ReservedName < BinData::Struct
-          int8 :a
-          int8 :invert # from Hash.instance_methods
-        end
-      END
+      class ReservedName < BinData::Struct
+        int8 :a
+        int8 :invert # from Hash.instance_methods
+      end
     }.should raise_error(NameError)
 
     lambda {
@@ -176,11 +167,9 @@ describe "Defining a Struct" do
 
   it "should fail when field name shadows an existing method" do
     lambda {
-      eval <<-END
-        class ExistingName < BinData::Struct
-          int8 :object_id
-        end
-      END
+      class ExistingName < BinData::Struct
+        int8 :object_id
+      end
     }.should raise_error(NameError)
 
     lambda {
@@ -190,11 +179,9 @@ describe "Defining a Struct" do
 
   it "should fail on unknown endian" do
     lambda {
-      eval <<-END
-        class BadEndian < BinData::Struct
-          endian 'a bad value'
-        end
-      END
+      class BadEndian < BinData::Struct
+        endian 'a bad value'
+      end
     }.should raise_error(ArgumentError)
   end
 end
@@ -266,23 +253,22 @@ end
 
 describe "A Struct with nested structs" do
   before(:all) do
-    eval <<-END
-      class StructInner1 < BinData::Struct
-        int8 :w, :initial_value => 3
-        int8 :x, :value => :the_val
-      end
+    class StructInner1 < BinData::Struct
+      int8 :w, :initial_value => 3
+      int8 :x, :value => :the_val
+    end
 
-      class StructInner2 < BinData::Struct
-        int8 :y, :value => lambda { parent.b.w }
-        int8 :z
-      end
+    class StructInner2 < BinData::Struct
+      int8 :y, :value => lambda { parent.b.w }
+      int8 :z
+    end
 
-      class StructOuter < BinData::Struct
-        int8          :a, :initial_value => 6
-        struct_inner1 :b, :the_val => :a
-        struct_inner2 nil
-      end
-    END
+    class StructOuter < BinData::Struct
+      int8          :a, :initial_value => 6
+      struct_inner1 :b, :the_val => :a
+      struct_inner2 nil
+    end
+
     @obj = StructOuter.new
   end
 
@@ -306,18 +292,17 @@ end
 
 describe "A Struct with an endian defined" do
   before(:all) do
-    eval <<-END
-      class StructWithEndian < BinData::Struct
-        endian :little
+    class StructWithEndian < BinData::Struct
+      endian :little
 
-        uint16 :a
-        float  :b
-        array  :c, :type => :int8, :initial_length => 2
-        choice :d, :choices => [ [:uint16], [:uint32] ], :selection => 1
-        struct :e, :fields => [ [:uint16, :f], [:uint32be, :g] ]
-        struct :h, :fields => [ [:struct, :i, {:fields => [[:uint16, :j]]}] ]
-      end
-    END
+      uint16 :a
+      float  :b
+      array  :c, :type => :int8, :initial_length => 2
+      choice :d, :choices => [ [:uint16], [:uint32] ], :selection => 1
+      struct :e, :fields => [ [:uint16, :f], [:uint32be, :g] ]
+      struct :h, :fields => [ [:struct, :i, {:fields => [[:uint16, :j]]}] ]
+    end
+
     @obj = StructWithEndian.new
   end
 
