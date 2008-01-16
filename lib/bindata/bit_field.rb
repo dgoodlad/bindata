@@ -58,10 +58,22 @@ module BinData
     end
 
     def _do_read(io)
+      # XXX Ugly way to reverse the order of the bytes read from the io stream
+      io = StringIO.new(io.read(num_bytes).unpack("C*").reverse.pack("C*"))
       bindata_objects.each { |f| f.do_read(io) }
     end
 
     def done_read
+      bindata_objects.each { |f| f.done_read }
+    end
+
+    def _write(io)
+      # XXX Ugly way to reverse the order in which bytes are written to the
+      #     given io stream
+      sio = StringIO.new
+      bindata_objects.each { |f| f.write(sio) }
+      sio.rewind
+      io.write sio.read(num_bytes).unpack("C*").reverse.pack("C*")
     end
 
     def bindata_objects
