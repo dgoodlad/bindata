@@ -2,6 +2,8 @@
 # Copyright (c) 2007,2008 Dion Mendel.
 
 require 'bindata/array'
+require 'bindata/bit'
+require 'bindata/bit_field'
 require 'bindata/choice'
 require 'bindata/float'
 require 'bindata/int'
