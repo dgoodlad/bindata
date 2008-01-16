@@ -108,6 +108,10 @@ module BinData
       @fields.map { |n, o| n }
     end
 
+    def done_read
+      bindata_objects.each { |f| f.done_read }
+    end
+
     private
 
     def _num_bytes(ignored)
@@ -118,10 +122,6 @@ module BinData
       # XXX Ugly way to reverse the order of the bytes read from the io stream
       io = StringIO.new(io.read(num_bytes).unpack("C*").reverse.pack("C*"))
       bindata_objects.each { |f| f.do_read(io) }
-    end
-
-    def done_read
-      bindata_objects.each { |f| f.done_read }
     end
 
     def _write(io)
