@@ -36,6 +36,8 @@ module BinData
   #                    element of the array is of the form [name, bit length,
   #                    params].
   class BitField < Base
+    register(self.name, self)
+
     mandatory_parameter :fields
 
     # Used by fields to store incomplete bytes left over from their read/write
@@ -92,6 +94,18 @@ module BinData
       else
         find_obj_for_name(name.to_s).clear
       end
+    end
+
+    def snapshot
+      hash = {}
+      @fields.each do |name, obj|
+        hash[name] = obj.snapshot
+      end
+      hash
+    end
+
+    def field_names
+      @fields.map { |n, o| n }
     end
 
     private

@@ -32,6 +32,10 @@ describe "A bit field with 8 bits of fields" do
     @bf.a.should == 0xC
   end
 
+  it "should include its fields in a snapshot" do
+    @bf.snapshot.should == { :a => 0xC, :b => 0x5, :c => 0 }
+  end
+
   it "should read from an io stream" do
     io = StringIO.new("\xA3")
     @bf.read(io)
