@@ -96,3 +96,23 @@ describe "A bit field with 16 bits of fields" do
     io.read.should == "\xAA\xEF"
   end
 end
+
+describe "A class extending a bit field" do
+  before(:all) do
+    class ExtendedBitField < BinData::BitField
+      field :a, 2
+      field :b, 6, :initial_value => 3
+    end
+  end
+
+  it "should be registered automatically" do
+    BinData::Registry.instance.lookup('extended_bit_field').should == ExtendedBitField
+  end
+
+  it "should default to using the fields in its definition" do
+    bf = ExtendedBitField.new
+    bf.num_bytes.should == 1
+    bf.a.should == 0
+    bf.b.should == 3
+  end
+end

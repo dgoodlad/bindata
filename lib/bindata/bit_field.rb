@@ -37,6 +37,18 @@ module BinData
   #                    params].
   class BitField < Base
     register(self.name, self)
+    def self.inherited(subclass)
+      register(subclass.name, subclass)
+    end
+
+    def self.field(name, bit_length, params = {})
+      @fields ||= []
+      @fields << [name, bit_length, params]
+    end
+
+    def self.fields
+      @fields || []
+    end
 
     mandatory_parameter :fields
 
@@ -45,6 +57,7 @@ module BinData
     attr_accessor :leftover_byte
 
     def initialize(params = {}, env = nil)
+      params[:fields] ||= self.class.fields
       super(params, env)
 
       bit_offset = 0

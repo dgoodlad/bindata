@@ -31,7 +31,12 @@ module BinData
 
     # Returns the class matching a previously registered +name+.
     def lookup(name)
-      @registry[name.to_s]
+      if name.is_a? Class
+        return nil unless @registry.has_value? name
+        name
+      else
+        @registry[name.to_s]
+      end
     end
   end
 end
