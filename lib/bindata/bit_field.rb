@@ -142,6 +142,8 @@ module BinData
       #     given io stream
       sio = StringIO.new
       bindata_objects.each { |f| f.write(sio) }
+      # Handle the last byte if the last field didn't consume an entire byte
+      sio.putc @leftover_byte unless @leftover_byte.nil?
       sio.rewind
       io.write sio.read(num_bytes).unpack("C*").reverse.pack("C*")
     end

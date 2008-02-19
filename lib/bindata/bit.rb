@@ -43,13 +43,19 @@ module BinData
     private
 
     def read_val(io)
+      #puts "Reading a bit value:"
+      #puts "  Bit offset: #{bit_offset}"
+      #puts "  Bit length: #{bit_length}"
+      #puts "  Leftover byte: #{leftover_byte.nil? ? 'n/a' : leftover_byte.to_s(2)}"
       bytes = if bit_offset > 0 && leftover_byte
                 [leftover_byte] + readbytes(io, num_bytes - 1).unpack("C*")
               else
                 readbytes(io, num_bytes).unpack("C*")
               end
+      #puts "  Bytes to read from: #{bytes.map { |b| b.to_s(2) }.inspect}"
 
       value, self.leftover_byte = read_value_from_bytes(bytes)
+      #puts "  Got value: #{value.to_s(2)}"
       value
     end
 
@@ -59,7 +65,7 @@ module BinData
         value |= b << (index * 8) >> bit_offset
       end
       value &= 2 ** bit_length - 1
-      leftover = bytes.last & 0xFF - (2 ** bit_offset - 1)
+      leftover = bytes.last #& 0xFF - (2 ** bit_offset - 1)
       return value, leftover
     end
 
@@ -88,6 +94,8 @@ module BinData
       # for later
       if (bit_offset + bit_length) % 8 != 0
         self.leftover_byte = bytes.pop
+      else
+        self.leftover_byte = nil
       end
 
       # If there are full bytes to write, write them to the io stream in
