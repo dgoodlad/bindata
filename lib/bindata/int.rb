@@ -40,6 +40,8 @@ module BinData
       case nbits
       when  8; "readbytes(io,1)[0]"
       when 16; "readbytes(io,2).unpack('#{c16}').at(0)"
+      when 24; "(a = readbytes(io,3).unpack(ccc); " +
+                     "(a.at(#{b2 * 2}) << 16) + (a.at(1) << 8) + a.at(#{b1 * 2}))"
       when 32; "readbytes(io,4).unpack('#{c32}').at(0)"
       when 64; "(a = readbytes(io,8).unpack('#{c32 * 2}'); " +
                      "(a.at(#{b2}) << 32) + a.at(#{b1}))"
@@ -51,12 +53,18 @@ module BinData
     def self.create_to_s_code(nbits, endian)
       c16 = (endian == :little) ? 'v' : 'n'
       c32 = (endian == :little) ? 'V' : 'N'
-      v1  = (endian == :little) ? 'val' : '(val >> 32)'
-      v2  = (endian == :little) ? '(val >> 32)' : 'val'
+      if nbits == 24
+        v1 = (endian == :little) ? 'val' : '(val >> 16)'
+        v2 = (endian == :little) ? '(val >> 16)' : 'val'
+      else
+        v1  = (endian == :little) ? 'val' : '(val >> 32)'
+        v2  = (endian == :little) ? '(val >> 32)' : 'val'
+      end
 
       case nbits
       when  8; "val.chr"
       when 16; "[val].pack('#{c16}')"
+      when 24; "[#{v1} & 0xff, (val >> 8) & 0xff, #{v2} & 0xff].pack('ccc')"
       when 32; "[val].pack('#{c32}')"
       when 64; "[#{v1} & 0xffffffff, #{v2} & 0xffffffff].pack('#{c32 * 2}')"
       else
@@ -112,6 +120,16 @@ module BinData
   # Unsigned 2 byte big endian integer.
   class Uint16be < Single
     Integer.create_uint_methods(self, 16, :big)
+  end
+
+  # Unsigned 3 byte little endian integer
+  class Uint24le < Single
+    Integer.create_uint_methods(self, 24, :little)
+  end
+
+  # Unsigned 3 byte big endian integer
+  class Uint24be < Single
+    Integer.create_uint_methods(self, 24, :big)
   end
 
   # Unsigned 4 byte little endian integer.
