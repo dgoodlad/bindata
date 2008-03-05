@@ -118,11 +118,18 @@ module BinData
     end
 
     def field_names
-      @fields.map { |n, o| n }
+      @fields.map { |n, o| n.id2name }
     end
 
     def done_read
       bindata_objects.each { |f| f.done_read }
+    end
+
+    def to_i
+      s = StringIO.new
+      write(s)
+      s.rewind
+      s.getc
     end
 
     private
